@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+    http://www.springframework.org/schema/beans/spring-beans.xsd 
+    http://www.springframework.org/schema/context  
+    http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/mvc 
+     http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+<context:annotation-config></context:annotation-config>
+<mvc:annotation-driven></mvc:annotation-driven>
+	<context:component-scan base-package="org.fileupload.controller"></context:component-scan>
+	
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+ 
+		 <property name="location"><value>classpath:resources/dbConfig.properties</value> </property> 
+		 
+	</bean> 
+
+	<!-- Hibernate Configuration -->
+	<bean id="myDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+	</bean>
+
+<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">  
+<property name="dataSource" ref="myDataSource"></property>  
+</bean> 
+	<bean id="mySessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="myDataSource" />
+
+		<property name="annotatedClasses">
+			<list>
+
+			<value>org.fileupload.model.FileuploadVO</value>
+				<value>org.fileupload.model.FileUpload</value>
+			</list>
+		</property>
+
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect"> org.hibernate.dialect.MySQLDialect</prop>
+					<prop key="hibernate.show_sql">true</prop>
+				  
+				  <prop key="hibernate.dbcp.initialSize">8</prop>
+				  <prop key="hibernate.dbcp.maxActive">20</prop>
+				  <prop key="hibernate.dbcp.maxIdle">20</prop>
+				  <prop key="hibernate.dbcp.minIdle">0</prop>
+				<prop key="hibernate.hbm2ddl.auto">none</prop>
+			</props>
+		</property>
+		
+	</bean>
+	<bean id="hibernateTemplate" class="org.springframework.orm.hibernate3.HibernateTemplate">
+		<constructor-arg ref="mySessionFactory" />
+	</bean>
+	<!-- list of bean definations -->
+
+
+	<bean id="fileuploadDAO" class="org.fileupload.dao.fileUploadDaoImpl">
+		<constructor-arg  ref="hibernateTemplate" />
+		 <!-- <constructor-arg  index ="1" ref="jdbcTemplate" ></constructor-arg> --> 
+	</bean>
+
+	
+		
+<bean id="fileuploadService" class="org.fileupload.service.fileUploadServiceImpl">
+	</bean> 
+	
+	
+
+	
+                           
+
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+		<property name="cacheSeconds" value="0" />
+	</bean>
+
+	 
+	<bean id="viewResolver"
+          class="org.springframework.web.servlet.view.InternalResourceViewResolver"
+          p:prefix="/WEB-INF/jsp/"
+          p:suffix=".jsp" />
+ 
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="maxUploadSize" value="5242880" />
+    </bean>
+ 
+	
+
+ <!-- <bean id="multipartResolver"
+        class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+ 
+        one of the properties available; the maximum file size in bytes
+        <property name="maxUploadSize" value="10000000" />
+    </bean>
+    
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="viewClass"
+			value="org.springframework.web.servlet.view.tiles2.TilesView" />
+	</bean>
+	<bean id="tilesConfigurer"
+		class="org.springframework.web.servlet.view.tiles2.TilesConfigurer"            
+		p:definitions="/WEB-INF/tiles-definitions.xml" /> -->
+
+	
+
+</beans>
+	
